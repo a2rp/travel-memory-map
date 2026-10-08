@@ -1,0 +1,22 @@
+.backToTop {
+    position: fixed;
+    z-index: 15;
+    right: 24px;
+    bottom: 24px;
+    display: grid;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: #49664f;
+    box-shadow: 0 7px 20px #2c392f35;
+
+    &:hover { box-shadow: 0 9px 25px #49664f56; }
+
+    @media (max-width: 640px) {
+        right: 16px;
+        bottom: 16px;
+    }
+}
