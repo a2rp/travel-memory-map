@@ -12,16 +12,32 @@ const initialMemories = [
     { id: "cairo", title: "Tea before the museum", city: "Cairo", country: "Egypt", year: 2024, note: "Mint tea, a shaded table, and a little more time than the map said we needed.", x: 58, y: 53 },
 ];
 
+const currentYear = new Date().getFullYear();
 const readMemories = () => {
     try {
         const saved = JSON.parse(localStorage.getItem(storageKey));
-        if (Array.isArray(saved)) return saved;
+        if (Array.isArray(saved)) {
+            const seenIds = new Set();
+            return saved.flatMap((memory) => {
+                if (!memory || typeof memory !== "object" || Array.isArray(memory)) return [];
+                const { id, title, city, country, year, note, x, y } = memory;
+                if (typeof id !== "string" || !id || seenIds.has(id)
+                    || typeof title !== "string" || !title.trim() || title.length > 64
+                    || typeof city !== "string" || !city.trim() || city.length > 40
+                    || typeof country !== "string" || !country.trim() || country.length > 40
+                    || !Number.isInteger(year) || year < 1900 || year > currentYear + 1
+                    || typeof note !== "string" || !note.trim() || note.length > 240
+                    || typeof x !== "number" || !Number.isFinite(x) || x < 5 || x > 95
+                    || typeof y !== "number" || !Number.isFinite(y) || y < 9 || y > 90) return [];
+                seenIds.add(id);
+                return [{ id, title: title.trim(), city: city.trim(), country: country.trim(), year, note: note.trim(), x, y }];
+            });
+        }
     } catch {
         // Use the example memories if local data is unavailable.
     }
     return initialMemories;
 };
-const currentYear = new Date().getFullYear();
 const sortMemories = (items) => [...items].sort((a, b) => b.year - a.year || a.city.localeCompare(b.city));
 
 const WorldIllustration = () => (
@@ -129,7 +145,7 @@ const MemoryMap = () => {
         link.href = url;
         link.download = "fieldnotes-memories.json";
         link.click();
-        URL.revokeObjectURL(url);
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
     const closeDialog = () => setDialog(null);
     const onOverlayMouseDown = (event) => { if (event.target === event.currentTarget) closeDialog(); };
